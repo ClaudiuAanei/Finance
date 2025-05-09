@@ -1,0 +1,32 @@
+{% extends 'base.html' %}
+
+{% block content %}
+  <div class="container mt-5">
+    <div class="row justify-content-center">
+      <div class="col-md-8 col-lg-6">
+        <div class="new-custom-card">
+          <div class="text-center mb-4">
+            <div class="upload-icon">📈</div>
+            <h3>Analizează-ți Bugetul cu Încredere</h3>
+            <p class="motivational-text mt-5">
+              Fiecare decizie financiară contează. Începe prin a înțelege unde se duc banii tăi. <br>Vei fi surprins cât de mult control poți avea asupra viitorului tău financiar.
+            </p>
+          </div>
+          <form method="post" enctype="multipart/form-data">
+            <div class="mb-3">
+              <label for="formFile" class="form-label">Încarcă extrasul tău bancar "fisier.csv"</label>
+              <input class="form-control" type="file" name="file" id="formFile" accept=".csv" aria-label="Alege fisierul CSV">
+            </div>
+            <div class="d-grid">
+              <button type="submit" class="btn btn-outline-primary" aria-label="Afișează raportul">Afișează Raportul</button>
+            </div>
+          </form>
+          <p class="text-center text-muted mt-3" style="font-size: 0.85rem;">
+            Datele tale sunt procesate în siguranță și nu sunt salvate.
+          </p>
+        </div>
+      </div>
+    </div>
+  </div>
+
+{% endblock %}
