@@ -1,18 +1,29 @@
 {% extends 'base.html' %}
 
 {% block content %}
-  <div class="container mt-5">
-    <div class="row justify-content-center">
-      <div class="col-md-8 col-lg-6">
-        <div class="new-custom-card">
-          <div class="text-center mb-4">
-            <div class="upload-icon">📈</div>
-            <h3>Analizează-ți Bugetul cu Încredere</h3>
-            <p class="motivational-text mt-5">
+<div class="container mt-5">
+  <div class="row justify-content-center">
+    <div class="col-md-8 col-lg-6">
+      <div class="card shadow-sm" style="border-radius: 1rem;">
+        <div class="card-body text-start">  <!-- Am înlocuit 'text-center' cu 'text-start' -->
+          <div class="mb-4">
+            <div class="fs-1 mb-3">
+              📈
+            </div>
+            <h3 class="text-center">Analizează-ți Bugetul cu Încredere</h3>
+            <p class="text-center mt-4">
               Fiecare decizie financiară contează. Începe prin a înțelege unde se duc banii tăi. <br>Vei fi surprins cât de mult control poți avea asupra viitorului tău financiar.
             </p>
           </div>
           <form method="post" enctype="multipart/form-data">
+            <div class="mb-3">
+              <label for="accountHolder" class="form-label">Detinatorul contului</label>
+              <input class="form-control" type="text" name="account_holder" id="accountHolder" placeholder="Introduceti detinatorul contului" required>
+            </div>
+            <div class="mb-3">
+              <label for="separator" class="form-label">Separatorul folosit pentru fisierul CSV</label>
+              <input class="form-control" type="text" name="separator" id="separator" placeholder="Introduceti separatorul (ex. , sau ;)" required>
+            </div>
             <div class="mb-3">
               <label for="formFile" class="form-label">Încarcă extrasul tău bancar "fisier.csv"</label>
               <input class="form-control" type="file" name="file" id="formFile" accept=".csv" aria-label="Alege fisierul CSV">
@@ -28,5 +39,6 @@
       </div>
     </div>
   </div>
+</div>
 
 {% endblock %}

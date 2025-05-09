@@ -127,12 +127,11 @@ input:checked + .slider:before {
 
 /* Tabel și container */
 .table-container {
-  max-height: 600px;
-  overflow-y: auto;
   border: 1px solid var(--table-border-light);
   border-radius: 10px;
   margin-top: 30px;
   background-color: var(--table-bg-light);
+  overflow: hidden;
 }
 
 body[data-theme="dark"] .table-container {
@@ -140,55 +139,58 @@ body[data-theme="dark"] .table-container {
   border: 1px solid var(--table-border-dark);
 }
 
-table {
+/* HEADER FIX – Tabelul separat */
+.table-header {
   width: 100%;
+  table-layout: fixed;
   border-collapse: collapse;
 }
 
-thead {
-  position: sticky;
-  top: 0;
-  z-index: 1;
-}
-
-/* Light theme header */
-body:not([data-theme="dark"]) thead {
+.table-header th {
+  padding: 12px;
+  text-align: left;
+  border-bottom: 1px solid var(--table-border-light);
   background-color: var(--yellow-light);
   color: var(--text-color-light);
 }
 
-/* Dark theme header */
-body[data-theme="dark"] thead {
+body[data-theme="dark"] .table-header th {
   background-color: var(--blue-dark);
   color: var(--text-color-dark);
+  border-bottom: 1px solid var(--table-border-dark);
 }
 
-tbody {
-  background-color: var(--table-bg-light);
+/* BODY scrollabil – Tabelul separat */
+.table-body-wrapper {
+  max-height: 600px;
+  overflow-y: auto;
 }
 
-body[data-theme="dark"] tbody {
-  background-color: var(--table-bg-dark);
+.table-body {
+  width: 100%;
+  table-layout: fixed;
+  border-collapse: collapse;
 }
 
-th, td {
+.table-body td {
   padding: 12px;
   text-align: left;
   border-bottom: 1px solid var(--table-border-light);
+  background-color: var(--table-bg-light);
 }
 
-body[data-theme="dark"] th,
-body[data-theme="dark"] td {
+body[data-theme="dark"] .table-body td {
   border-bottom: 1px solid var(--table-border-dark);
+  background-color: var(--table-bg-dark);
   color: var(--text-color-dark);
 }
 
 /* Hover rânduri */
-tbody tr:hover {
+.table-body tr:hover td {
   background-color: var(--row-hover-light);
 }
 
-body[data-theme="dark"] tbody tr:hover {
+body[data-theme="dark"] .table-body tr:hover td {
   background-color: var(--row-hover-dark);
 }
 
@@ -196,7 +198,6 @@ body[data-theme="dark"] tbody tr:hover {
 .text-muted {
   color: var(--muted-color) !important;
 }
-
 
 /* Navbar stil pentru light și dark */
 #mainNavbar {

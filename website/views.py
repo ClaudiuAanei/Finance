@@ -9,22 +9,32 @@ SESSIONS_DATA = {}
 
 @views.route('/', methods= ['GET','POST'])
 def home_page():
+    global SESSIONS_DATA
     if request.method == 'POST':
 
         file = request.files['file']
+        separator = request.form.get('separator')
+        detinator = request.form.get('account_holder')
         if file and file.filename.endswith('.csv'):
+
             content = file.read().decode('utf-8')
-            clean_file = ProcessFile(file= content, sep= ';', name= 'CLAUDIU AANEI')
-            df = clean_file.get_last_month_tabel()
+            clean_file = ProcessFile(file= content, sep= separator[0], name= detinator)
+            try:
+                df = clean_file.get_last_month_tabel()
+            except AttributeError:
+                return redirect(url_for('views.home_page'))
             df['Date'] = df['Date'].dt.strftime('%Y-%m-%d')
 
-
             json_format = df.to_json(orient= 'records', date_format='iso', indent= 4)
-            finances_tabel = json.loads(json_format)
+            finances_table = json.loads(json_format)
+
+            with open('categories.json', mode='r', encoding='utf-8') as f:
+                data = f.read()
+                categories = json.loads(data)
 
             id_session = str(uuid.uuid4())
 
-            SESSIONS_DATA[id_session] = finances_tabel
+            SESSIONS_DATA[id_session] = [finances_table, categories]
             session['id_session'] = id_session
 
             return redirect(url_for('views.finances'))
@@ -34,15 +44,53 @@ def home_page():
 
 @views.route('/finances')
 def finances():
-    finances_tabel = None
+    finances_table = None
+    categories = None
     id_session = session.get('id_session')
 
     if id_session and id_session in SESSIONS_DATA:
-        finances_tabel = SESSIONS_DATA[id_session]
+        finances_table = SESSIONS_DATA[id_session][0]
+        categories = SESSIONS_DATA[id_session][1]
 
-    return render_template('finances.html', tabel= finances_tabel)
+    return render_template('finances.html', table= finances_table, categories= categories)
 
-@views.route('/apply_changes')
+@views.route('/apply_changes', methods= ['GET', 'POST'])
 def save_changes():
-    pass
+
+    if request.method == 'POST':
+        categories = SESSIONS_DATA[session['id_session']][1]
+        finances_table = SESSIONS_DATA[session['id_session']][0]
+
+        categories = {key: [] for key in categories}
+
+        for idx, row in enumerate(finances_table):
+            category = request.form.get(f'category_{idx + 1}')
+            if category and category != 'uncategorized':
+                if row['Description'] not in categories.get(category, []):
+                    categories.setdefault(category, []).append(row['Description'])
+
+        for row in finances_table:
+            for category in categories:
+                if row['Description'] in categories[category]:
+                    row['Category'] = category
+
+
+    return redirect(url_for('views.finances'))
+
+@views.route('/clear')
+def clear_data():
+    finances_table = SESSIONS_DATA[session['id_session']][0]
+    categories = SESSIONS_DATA[session['id_session']][1]
+
+
+    categories = {key: [] for key in categories}
+
+    for row in finances_table:
+        row['Category'] = 'uncategorized'
+
+    SESSIONS_DATA[session['id_session']].clear()
+    SESSIONS_DATA[session['id_session']] = [finances_table, categories]
+
+
+    return redirect(url_for('views.finances'))
 

@@ -37,6 +37,10 @@ categories = {
     'others': ['MEDIA MARKT', 'KREFEL','DE KEUKELAERE', 'SPORTCENTRUM DE DAM', 'SENDING MONEY INSTANTLY TO', 'DIRK P2P MOBILE']
 }
 
+# with open('../FILE/uploaded_file.csv', mode='r', encoding='utf-8') as data:
+#     content = data.read()
+
+
 class ProcessFile:
     def __init__(self,name= 'No_Name', file= None, sep= ','):
         self.name = name
@@ -81,12 +85,14 @@ class ProcessFile:
         else:
             return None
 
-    def change_description(self,df_filtrat):
+    def change_description(self, df_filtrat):
 
         """Modifica descrierea pentru o citire mai usoara."""
+        name = df_filtrat['Name'].values[0]
+
         df_filtrat.loc[df_filtrat['Description'].str.contains(from_saving_account, case=False, na=False), 'Description'] = str(categories['own accounts'][0])
         df_filtrat.loc[df_filtrat['Description'].str.contains(to_saving_account, case=False, na=False), 'Description'] = str(categories['own accounts'][1])
-        df_filtrat.loc[df_filtrat['Name'].str.contains('AANEI-AANEI', case=False, na=False), 'Name'] = str(self.name)
+        df_filtrat.loc[df_filtrat['Name'].str.contains(name, case=False, na=False), 'Name'] = str(self.name)
 
         for store in stores:
             df_filtrat.loc[df_filtrat['Description'].str.contains(store, case=False, na=False), 'Description'] = str(store)
@@ -124,3 +130,10 @@ class ProcessFile:
         new_df = self.change_description(last_month_data)
 
         return new_df
+
+
+if __name__ == '__main__':
+    files = ProcessFile(file= content, name='Claudiu', sep=';')
+
+    data = files.get_last_month_tabel()
+    print(data)
