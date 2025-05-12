@@ -37,9 +37,6 @@ categories = {
     'others': ['MEDIA MARKT', 'KREFEL','DE KEUKELAERE', 'SPORTCENTRUM DE DAM', 'SENDING MONEY INSTANTLY TO', 'DIRK P2P MOBILE']
 }
 
-# with open('../FILE/uploaded_file.csv', mode='r', encoding='utf-8') as data:
-#     content = data.read()
-
 
 class ProcessFile:
     def __init__(self,name= 'No_Name', file= None, sep= ','):
@@ -133,6 +130,9 @@ class ProcessFile:
 
 
 if __name__ == '__main__':
+    with open('../FILE/uploaded_file.csv', mode='r', encoding='utf-8') as data:
+        content = data.read()
+
     files = ProcessFile(file= content, name='Claudiu', sep=';')
 
     data = files.get_last_month_tabel()

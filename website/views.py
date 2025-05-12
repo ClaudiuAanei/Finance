@@ -52,7 +52,12 @@ def finances():
         finances_table = SESSIONS_DATA[id_session][0]
         categories = SESSIONS_DATA[id_session][1]
 
-    return render_template('finances.html', table= finances_table, categories= categories)
+    try:
+        raport = SESSIONS_DATA[id_session][2]
+    except IndexError:
+        raport = None
+
+    return render_template('finances.html', table= finances_table, categories= categories, raport=raport)
 
 @views.route('/apply_changes', methods= ['GET', 'POST'])
 def save_changes():
@@ -93,4 +98,20 @@ def clear_data():
 
 
     return redirect(url_for('views.finances'))
+
+@views.route('/delete', methods= ['GET','POST'])
+def delete():
+    if request.method == 'POST':
+
+        finances_table = SESSIONS_DATA[session['id_session']][0]
+        selected_rows = request.form.getlist('selected_rows')
+
+        if selected_rows:
+            for i in reversed(selected_rows):
+                finances_table.pop(int(i) - 1)
+
+            SESSIONS_DATA[session['id_session']][0] = finances_table
+
+    return redirect(url_for('views.finances'))
+
 

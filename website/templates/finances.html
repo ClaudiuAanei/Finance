@@ -4,26 +4,29 @@
 
 <div class="container my-5 p-4 rounded-4 shadow-sm bg-body-tertiary" style="border: 1px solid #d3d3d3;">
   <!-- Începutul formularului -->
-  <form method="post" action="{{ url_for('views.save_changes') }}">
+  <form method="post">
 
     <!-- Header cu titlu și buton -->
     <div class="d-flex justify-content-between align-items-center mb-3">
       <h2 class="mb-0">Tranzacțiile mele</h2>
-      <button type="submit" class="btn btn-outline-success">Salvează modificările</button>
+      <button type="submit" class="btn btn-outline-info" formaction="{{ url_for('views.save_changes') }}">Show Report</button>
     </div>
 
+
     <!-- Tabel scrollabil -->
-    <div class="table-responsive rounded-2" style="max-height: 600px;">
+    <div class="table-responsive rounded-2 mt-2" style="max-height: 600px;">
       <table class="table table-striped table-hover mb-0">
         <thead class="table-primary" style="position: sticky; top: 0; z-index: 1;">
           <tr>
-              <th> Nr </th>
+
+            <th>Nr</th>
             <th>Name</th>
             <th>Date</th>
             <th>Description</th>
             <th>Amount</th>
             <th>Currency</th>
             <th>Category</th>
+            <th></th>
           </tr>
         </thead>
         <tbody>
@@ -44,13 +47,34 @@
                 {% endfor %}
               </select>
             </td>
+            <td>
+              <input style="transform: scale(1.5); margin-top: 8px;" type="checkbox" name="selected_rows" value="{{ loop.index }}">
+            </td>
           </tr>
           {% endfor %}
         </tbody>
       </table>
     </div>
 
+    <!-- Butoane: Clear în stânga, Delete în dreapta -->
+    <div class="d-flex justify-content-between mt-3">
+
+      <a href="{{ url_for('views.clear_data') }}" class="btn btn-outline-warning">Clear Categories</a>
+
+      <button type="submit" class="btn btn-outline-success" formaction="{{ url_for('views.save_changes') }}"
+              onclick="return confirm('Are you sure you really want to save your changes ?')">Apply Changes</button>
+
+      <button type="submit" class="btn btn-outline-danger" formaction="{{ url_for('views.delete') }}"
+              onclick="return confirm('Sigur vrei să ștergi rândurile selectate?');">Delete Selected Rows</button>
+    </div>
   </form>
-  <a href="{{ url_for('views.clear_data') }}" class="btn btn-outline-warning mt-2">Clear Categories</a>
 </div>
+
+{% if raport %}
+
+  <div class="container my-5 p-4 rounded-4 shadow-sm bg-body-tertiary" style="border: 1px solid #d3d3d3;">
+    <h3>Total Income : </h3>
+  </div>
+
+{% endif %}
 {% endblock %}
