@@ -14,7 +14,8 @@ stores = ['DEPOSIT ATM', 'A-PACK BV /A/', 'KBC BANK NV CASHBACK KATE COINS', 'CO
           'SENDING MONEY TO SAVINGS ACCOUNT', 'STAD LOKEREN', 'APB-GEZINNEN', 'CVO FOCUS', 'STD BH', 'BOOKING.COM',
           'NAPOLEON GAMES NV', 'SONY INTERACTIVE', 'ACV OOST-VLAANDEREN LEDENBIJDRAGEN', 'KBC PLUS ACCOUNT',
           'CASH WITHDRAWAL', 'MEDIA MARKT', 'KREFEL', 'DE KEUKELAERE', 'SPORTCENTRUM DE DAM',
-          'SENDING MONEY INSTANTLY TO', 'DIRK P2P MOBILE','REVOLUT','KRUIDVAT', 'MARIA MIDDELARE'
+          'SENDING MONEY INSTANTLY TO', 'DIRK P2P MOBILE','REVOLUT','KRUIDVAT', 'MARIA MIDDELARE', 'VAKANTIEGELD',
+          'MUCH MORE MARKET BENEL BE BRUXELLES'
           ]
 
 categories = {
@@ -37,12 +38,24 @@ categories = {
     'others': ['MEDIA MARKT', 'KREFEL','DE KEUKELAERE', 'SPORTCENTRUM DE DAM', 'SENDING MONEY INSTANTLY TO', 'DIRK P2P MOBILE']
 }
 
+date_formats = {
+    "dd/mm/yyyy": "%d/%m/%Y",
+    "mm/dd/yyyy": "%m/%d/%Y",
+    "yyyy/mm/dd": "%Y/%m/%d",
+    "yyyy/dd/mm": "%Y/%d/%m",
+    "dd-mm-yyyy": "%d-%m-%Y",
+    "mm-dd-yyyy": "%m-%d-%Y",
+    "yyyy-mm-dd": "%Y-%m-%d",
+    "yyyy-dd-mm": "%Y-%d-%m"
+}
+
 
 class ProcessFile:
-    def __init__(self,name= 'No_Name', file= None, sep= ','):
+    def __init__(self, file, name: str= 'No_Name', date_format: str= 'dd/mm/yyyy' ,sep:str= ','):
         self.name = name
         self.file = file
         self.sep = sep
+        self.date_format = date_formats[date_format]
 
 
     def process_file(self):
@@ -65,18 +78,19 @@ class ProcessFile:
         else:
             return None
 
-    @staticmethod
-    def convert_tabel(corrected_file):
+
+    def convert_tabel(self, corrected_file):
         if corrected_file:
-            df = pd.read_csv(corrected_file, sep= ';')
+            df = pd.read_csv(corrected_file, sep= self.sep)
             columns_to_keep = ["Name", "Date", "Description", "Amount", "Currency"]
 
             new_df = df[columns_to_keep].copy()
             new_df['Category'] = "uncategorized"
-            new_df['Amount'] = new_df['Amount'].str.replace(',', '.')
-            new_df['Date'] = pd.to_datetime(new_df['Date'], dayfirst= True, errors='coerce')
-            new_df['Amount'] = new_df['Amount'].astype(float)
+            if new_df['Amount'].dtype == object:
+                new_df['Amount'] = new_df['Amount'].str.replace(',', '.')
+            new_df['Date'] = pd.to_datetime(new_df['Date'], format= self.date_format, dayfirst=True)
 
+            new_df['Amount'] = new_df['Amount'].astype(float)
             return new_df
 
         else:
@@ -85,11 +99,10 @@ class ProcessFile:
     def change_description(self, df_filtrat):
 
         """Modifica descrierea pentru o citire mai usoara."""
-        name = df_filtrat['Name'].values[0]
-
+        df_filtrat = df_filtrat.copy()
+        df_filtrat['Name'] = self.name
         df_filtrat.loc[df_filtrat['Description'].str.contains(from_saving_account, case=False, na=False), 'Description'] = str(categories['own accounts'][0])
         df_filtrat.loc[df_filtrat['Description'].str.contains(to_saving_account, case=False, na=False), 'Description'] = str(categories['own accounts'][1])
-        df_filtrat.loc[df_filtrat['Name'].str.contains(name, case=False, na=False), 'Name'] = str(self.name)
 
         for store in stores:
             df_filtrat.loc[df_filtrat['Description'].str.contains(store, case=False, na=False), 'Description'] = str(store)
@@ -97,12 +110,28 @@ class ProcessFile:
         return df_filtrat
 
 
-    def get_tabel(self):
+    def get_tabel(self, first_date: str= None, last_date: str = None):
         """Afiseaza tot tabelul procesat."""
-        df = self.convert_tabel(self.process_file())
+        data = self.process_file()
+        df = self.convert_tabel(data)
 
         if df.empty:
             return None
+
+        df['Date'] = pd.to_datetime(df['Date'], format=self.date_format)
+
+        if first_date:
+            first_date = pd.to_datetime(first_date, format= self.date_format)
+        else:
+            first_date = pd.to_datetime(df['Date'].min(), format= self.date_format)
+
+        if last_date:
+            last_date = pd.to_datetime(last_date, format= self.date_format, dayfirst= True)
+        else:
+            last_date = str(pd.to_datetime('today', format= self.date_format, dayfirst= True))
+
+
+        df = df[(df['Date'] >= first_date) & (df['Date'] <= last_date)]
 
         new_df = self.change_description(df)
 
@@ -111,7 +140,9 @@ class ProcessFile:
 
     def get_last_month_tabel(self):
         """Afiseaza doar ultima luna din tabelul procesat."""
-        df = self.convert_tabel(self.process_file())
+        data = self.process_file()
+        df = self.convert_tabel(data)
+
 
         if df.empty:
             return None
@@ -122,7 +153,6 @@ class ProcessFile:
         first_day_last_month = (first_day_current_month - pd.DateOffset(days=1)).replace(day=1)
 
         first_day_of_last_month = pd.Timestamp(first_day_last_month).normalize()
-
         last_month_data = df[(df['Date'] >= first_day_of_last_month) & (df['Date'] < first_day_current_month)]
         new_df = self.change_description(last_month_data)
 
@@ -130,10 +160,9 @@ class ProcessFile:
 
 
 if __name__ == '__main__':
-    with open('../FILE/uploaded_file.csv', mode='r', encoding='utf-8') as data:
-        content = data.read()
+    with open('../FILE/tranzactii_aprilie_claudiu.csv', mode='r', encoding='utf-8') as f:
+        content = f.read()
 
-    files = ProcessFile(file= content, name='Claudiu', sep=';')
-
-    data = files.get_last_month_tabel()
-    print(data)
+    fd = ProcessFile(file= content, name='Claudiu', sep=';', date_format= 'yyyy-mm-dd')
+    mdf = fd.get_tabel()
+    print(mdf )

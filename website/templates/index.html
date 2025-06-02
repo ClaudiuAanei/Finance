@@ -5,33 +5,73 @@
   <div class="row justify-content-center">
     <div class="col-md-8 col-lg-6">
       <div class="card shadow-sm" style="border-radius: 1rem;">
-        <div class="card-body text-start">  <!-- Am înlocuit 'text-center' cu 'text-start' -->
+        <div class="card-body text-start">
           <div class="mb-4">
-            <div class="fs-1 mb-3">
-              📈
-            </div>
+            <div class="fs-1 mb-3">📈</div>
             <h3 class="text-center">Analizează-ți Bugetul cu Încredere</h3>
             <p class="text-center mt-4">
-              Fiecare decizie financiară contează. Începe prin a înțelege unde se duc banii tăi. <br>Vei fi surprins cât de mult control poți avea asupra viitorului tău financiar.
+              Fiecare decizie financiară contează. Începe prin a înțelege unde se duc banii tăi.<br>
+              Vei fi surprins cât de mult control poți avea asupra viitorului tău financiar.
             </p>
           </div>
+
           <form method="post" enctype="multipart/form-data">
+            <!-- Detinatorul contului -->
             <div class="mb-3">
-              <label for="accountHolder" class="form-label">Detinatorul contului</label>
-              <input class="form-control" type="text" name="account_holder" id="accountHolder" placeholder="Introduceti detinatorul contului" required>
+              <label for="accountHolder" class="form-label">Deținătorul contului</label>
+              <input class="form-control" type="text" name="account_holder" id="accountHolder"
+                     placeholder="Introduceți deținătorul contului" required>
             </div>
+
+            <!-- Data de început -->
             <div class="mb-3">
-              <label for="separator" class="form-label">Separatorul folosit pentru fisierul CSV</label>
-              <input class="form-control" type="text" name="separator" id="separator" placeholder="Introduceti separatorul (ex. , sau ;)" required>
+              <label for="start-date" class="form-label">From ( it can be nothing. It will be your first transaction in your CSV. )</label>
+              <input class="form-control" type="date" name="start-date" id="start-date">
             </div>
+
+            <!-- Data de sfârșit -->
             <div class="mb-3">
-              <label for="formFile" class="form-label">Încarcă extrasul tău bancar "fisier.csv"</label>
-              <input class="form-control" type="file" name="file" id="formFile" accept=".csv" aria-label="Alege fisierul CSV">
+              <label for="end-date" class="form-label">Until ( it can be nothing. It will be your last transaction in your CSV. )</label>
+              <input class="form-control" type="date" name="end-date" id="end-date">
             </div>
+
+            <!-- Formatul datei -->
+            <div class="mb-3">
+              <label for="date-format" class="form-label">Day Month Year Format In Your CSV</label>
+              <select class="form-control" id="date-format" name="date-format">
+                <option value="dd-mm-yyyy">Day-Month-Year</option>
+                <option value="mm-dd-yyyy">Month-Day-Year</option>
+                <option value="yyyy-mm-dd">Year-Month-Day</option>
+                <option value="yyyy-dd-mm">Year-Day-Month</option>
+                <option value="dd/mm/yyyy">Day/Month/Year</option>
+                <option value="mm/dd/yyyy">Month/Day/Year</option>
+                <option value="yyyy/mm/dd">Year/Month/Day</option>
+                <option value="yyyy/dd/mm">Year/Day/Month</option>
+              </select>
+            </div>
+
+            <!-- Separator CSV -->
+            <div class="mb-3">
+              <label for="separator" class="form-label">Separatorul folosit pentru fișierul CSV</label>
+              <input class="form-control" type="text" name="separator" id="separator"
+                     placeholder="Ex: , ; |" maxlength="1" required>
+              <div class="form-text">Introdu un singur caracter (ex: , ; |)</div>
+            </div>
+
+            <!-- Upload fișier -->
+            <div class="mb-3">
+              <label for="formFile" class="form-label">Încarcă extrasul tău bancar „fisier.csv”</label>
+              <input class="form-control" type="file" name="file" id="formFile" accept=".csv" required>
+            </div>
+
+            <!-- Buton submit -->
             <div class="d-grid">
-              <button type="submit" class="btn btn-outline-primary" aria-label="Afișează raportul">Afișează Raportul</button>
+              <button type="submit" class="btn btn-outline-primary" aria-label="Afișează raportul">
+                Afișează Raportul
+              </button>
             </div>
           </form>
+
           <p class="text-center text-muted mt-3" style="font-size: 0.85rem;">
             Datele tale sunt procesate în siguranță și nu sunt salvate.
           </p>
@@ -40,5 +80,4 @@
     </div>
   </div>
 </div>
-
 {% endblock %}

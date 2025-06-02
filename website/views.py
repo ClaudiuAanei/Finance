@@ -1,29 +1,39 @@
 import json
 import uuid
+import pandas as pd
 from flask import Blueprint, render_template, request, redirect, url_for, session
-from website.report import ProcessFile
+from website.readfile import ProcessFile
+from website.raportmaker import show_stats
+from website.dateformat import change_date_format
 
 views = Blueprint('views',__name__)
 
 SESSIONS_DATA = {}
+
 
 @views.route('/', methods= ['GET','POST'])
 def home_page():
     global SESSIONS_DATA
     if request.method == 'POST':
 
-        file = request.files['file']
-        separator = request.form.get('separator')
         detinator = request.form.get('account_holder')
+        date_format = request.form.get('date-format')
+
+        start_date = change_date_format(request.form.get('start-date'), date_format)
+        end_date = change_date_format(request.form.get('end-date'), date_format)
+
+        separator = request.form.get('separator')
+        file = request.files['file']
+
         if file and file.filename.endswith('.csv'):
 
             content = file.read().decode('utf-8')
-            clean_file = ProcessFile(file= content, sep= separator[0], name= detinator)
+            clean_file = ProcessFile(file= content, sep= separator[0], name= detinator, date_format= date_format)
             try:
-                df = clean_file.get_last_month_tabel()
+                df = clean_file.get_tabel(first_date= start_date, last_date= end_date)
             except AttributeError:
                 return redirect(url_for('views.home_page'))
-            df['Date'] = df['Date'].dt.strftime('%Y-%m-%d')
+            df['Date'] = df['Date'].dt.strftime('%d/%m/%Y')
 
             json_format = df.to_json(orient= 'records', date_format='iso', indent= 4)
             finances_table = json.loads(json_format)
@@ -59,6 +69,7 @@ def finances():
 
     return render_template('finances.html', table= finances_table, categories= categories, raport=raport)
 
+
 @views.route('/apply_changes', methods= ['GET', 'POST'])
 def save_changes():
 
@@ -82,6 +93,7 @@ def save_changes():
 
     return redirect(url_for('views.finances'))
 
+
 @views.route('/clear')
 def clear_data():
     finances_table = SESSIONS_DATA[session['id_session']][0]
@@ -99,6 +111,7 @@ def clear_data():
 
     return redirect(url_for('views.finances'))
 
+
 @views.route('/delete', methods= ['GET','POST'])
 def delete():
     if request.method == 'POST':
@@ -115,3 +128,10 @@ def delete():
     return redirect(url_for('views.finances'))
 
 
+@views.route('/stats')
+def generate_stats():
+    data = SESSIONS_DATA[session['id_session']][0]
+    df = pd.DataFrame(data)
+    df.to_csv('formated.csv', index= False)
+    SESSIONS_DATA[session['id_session']].insert(2, show_stats(df))
+    return redirect(url_for('views.finances'))
