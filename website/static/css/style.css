@@ -1,0 +1,184 @@
+/* static/style.css (FINAL VERSION) */
+
+/* --- Google Font & Root Variables --- */
+@import url('https://fonts.googleapis.com/css2?family=Be+Vietnam+Pro:wght@400;500;600;700&display=swap');
+
+:root {
+    --primary-color: #6366f1;
+    --primary-hover: #4f46e5;
+    --background-light: #f8f9fa;
+    --background-dark: #0b0f19;
+    --card-bg-light: #ffffff;
+    --card-bg-dark: #111827;
+    --text-primary-light: #212529;
+    --text-primary-dark: #f8f9fa;
+    --text-secondary-light: #6c757d;
+    --text-secondary-dark: #adb5bd;
+    --border-light: #dee2e6;
+    --border-dark: #343a40;
+    --shadow-sm: 0 1px 2px 0 rgb(0 0 0 / 0.05);
+    --shadow-md: 0 4px 8px -1px rgb(0 0 0 / 0.07), 0 2px 6px -2px rgb(0 0 0 / 0.06);
+}
+
+/* --- General & Theme Styling --- */
+body {
+    font-family: 'Be Vietnam Pro', sans-serif;
+    background-color: var(--background-light);
+    color: var(--text-primary-light);
+    transition: background-color 0.3s ease, color 0.3s ease;
+}
+
+[data-bs-theme="dark"] body {
+    background-color: var(--background-dark);
+    color: var(--text-primary-dark);
+}
+
+.navbar {
+    background-color: var(--card-bg-light);
+    box-shadow: var(--shadow-sm);
+    transition: background-color 0.3s ease;
+}
+[data-bs-theme="dark"] .navbar {
+    background-color: var(--card-bg-dark);
+}
+
+.navbar-brand {
+    font-weight: 700;
+    color: var(--primary-color);
+}
+
+/* --- Footer --- */
+.footer {
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    width: 100%;
+    padding: 2.5rem 0;
+    margin-top: 4rem;
+    color: var(--text-secondary-light);
+}
+[data-bs-theme="dark"] .footer {
+    color: var(--text-secondary-dark);
+}
+.footer p {
+    margin: 0;
+}
+
+
+/* --- Card & Form Styling --- */
+.card {
+    background-color: var(--card-bg-light);
+    border-radius: 0.75rem;
+    box-shadow: var(--shadow-md);
+    transition: background-color 0.3s ease, border-color 0.3s ease;
+    border: none;
+}
+[data-bs-theme="dark"] .card {
+    background-color: var(--card-bg-dark);
+}
+
+.form-label {
+    font-weight: 600;
+    color: var(--text-secondary-light);
+}
+[data-bs-theme="dark"] .form-label {
+    color: var(--text-secondary-dark);
+}
+
+.form-control, .form-select {
+    background-color: var(--background-light);
+    border: 1px solid var(--border-light);
+    border-radius: 0.5rem;
+    font-weight: 500;
+    transition: all 0.2s ease;
+}
+[data-bs-theme="dark"] .form-control, [data-bs-theme="dark"] .form-select {
+    background-color: var(--background-dark);
+    border-color: var(--border-dark);
+    color: var(--text-primary-dark);
+}
+
+.form-control:focus, .form-select:focus {
+    border-color: var(--primary-color);
+    box-shadow: 0 0 0 3px var(--primary-color, 0.25);
+    background-color: var(--card-bg-light);
+}
+[data-bs-theme="dark"] .form-control:focus, [data-bs-theme="dark"] .form-select:focus {
+    background-color: var(--card-bg-dark);
+}
+
+/* --- Button Styling --- */
+.btn {
+    border-radius: 0.5rem;
+    font-weight: 600;
+    padding: 0.75rem 1.5rem;
+    transition: all 0.2s ease-in-out;
+}
+.btn-primary {
+    background-color: var(--primary-color);
+    border: none;
+    box-shadow: var(--shadow-sm);
+}
+.btn-primary:hover {
+    background-color: var(--primary-hover);
+    transform: translateY(-2px);
+    box-shadow: var(--shadow-md);
+}
+
+/* --- Table Styling --- */
+.table-responsive {
+    border-radius: 0.5rem;
+}
+
+.table {
+    background-color: var(--card-bg-light);
+    margin-bottom: 0;
+}
+[data-bs-theme="dark"] .table {
+    background-color: var(--card-bg-dark);
+}
+
+.table thead th {
+    background-color: var(--background-light);
+    border-bottom: 1px solid var(--border-light);
+    font-weight: 600;
+    color: var(--text-secondary-light);
+    position: sticky;
+    top: 0;
+    z-index: 10;
+}
+[data-bs-theme="dark"] .table thead th {
+    background-color: var(--background-dark);
+    border-color: var(--border-dark);
+    color: var(--text-secondary-dark);
+}
+
+.table td {
+    vertical-align: middle;
+}
+
+.table-hover tbody tr {
+    transition: background-color 0.15s ease-in-out;
+}
+.table-hover tbody tr:hover {
+    background-color: #f8f9fa;
+}
+[data-bs-theme="dark"] .table-hover tbody tr:hover {
+    background-color: #1a2332;
+}
+.table-hover tbody tr:not(:last-of-type) {
+    border-bottom: 1px solid var(--border-light);
+}
+[data-bs-theme="dark"] .table-hover tbody tr:not(:last-of-type) {
+    border-bottom: 1px solid var(--border-dark);
+}
+
+
+/* --- Checkbox Styling --- */
+.form-check-input {
+    cursor: pointer;
+}
+.form-check-input:checked {
+    background-color: var(--primary-color);
+    border-color: var(--primary-color);
+}

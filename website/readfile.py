@@ -52,6 +52,16 @@ date_formats = {
 
 class ProcessFile:
     def __init__(self, file, name: str= 'No_Name', date_format: str= 'dd/mm/yyyy' ,sep:str= ','):
+        """
+        Initializes the ProcessFile object.
+
+        Args:
+            file (str): The string content of the CSV file.
+            name (str, optional): The name of the account holder. Defaults to 'No_Name'.
+            date_format (str, optional): The format of the dates in the file.
+                                         Defaults to 'dd/mm/yyyy'.
+            sep (str, optional): The separator used in the CSV file. Defaults to ','.
+        """
         self.name = name
         self.file = file
         self.sep = sep
@@ -59,7 +69,16 @@ class ProcessFile:
 
 
     def process_file(self):
+        """
+        Reads and corrects the CSV file content.
 
+        This method splits the input string into lines and handles cases where
+        the header has fewer columns than the data rows by padding it.
+
+        Returns:
+            io.StringIO or None: A file-like object containing the corrected
+                                 CSV content, or None if the input file is empty.
+        """
         if self.file:
             lines = self.file.splitlines()
 
@@ -80,6 +99,20 @@ class ProcessFile:
 
 
     def convert_tabel(self, corrected_file):
+        """
+        Converts the corrected CSV content into a pandas DataFrame.
+
+        It reads the CSV data, selects a subset of columns, sets a default
+        'uncategorized' value, and standardizes the data types for 'Amount'
+        and 'Date' columns.
+
+        Args:
+            corrected_file (io.StringIO): A file-like object with the CSV data.
+
+        Returns:
+            pd.DataFrame or None: A cleaned and formatted DataFrame, or None
+                                  if the input is empty.
+        """
         if corrected_file:
             df = pd.read_csv(corrected_file, sep= self.sep)
             columns_to_keep = ["Name", "Date", "Description", "Amount", "Currency"]
@@ -97,8 +130,20 @@ class ProcessFile:
             return None
 
     def change_description(self, df_filtrat):
+        """
+        Standardizes transaction descriptions for easier reading and categorization.
 
-        """Modifica descrierea pentru o citire mai usoara."""
+        This method iterates through a predefined list of store names and keywords.
+        If a keyword is found in a transaction's description, the description is
+        replaced with the standardized keyword.
+
+        Args:
+            df_filtrat (pd.DataFrame): The DataFrame whose descriptions are to be changed.
+
+        Returns:
+            pd.DataFrame: The DataFrame with updated descriptions.
+        """
+
         df_filtrat = df_filtrat.copy()
         df_filtrat['Name'] = self.name
         df_filtrat.loc[df_filtrat['Description'].str.contains(from_saving_account, case=False, na=False), 'Description'] = str(categories['own accounts'][0])
@@ -111,7 +156,22 @@ class ProcessFile:
 
 
     def get_tabel(self, first_date: str= None, last_date: str = None):
-        """Afiseaza tot tabelul procesat."""
+        """
+        Processes the file and returns a complete, filtered DataFrame.
+
+        This is the main method that orchestrates the file processing, conversion
+        to a DataFrame, and description standardization. It can also filter the
+        transactions based on a start and end date.
+
+        Args:
+            first_date (str, optional): The start date for filtering (in the specified format).
+                                        Defaults to the earliest date in the file.
+            last_date (str, optional): The end date for filtering. Defaults to today.
+
+        Returns:
+            pd.DataFrame or None: The final, processed (and possibly filtered)
+                                  DataFrame, or None if the initial file is empty.
+        """
         data = self.process_file()
         df = self.convert_tabel(data)
 
@@ -139,7 +199,18 @@ class ProcessFile:
 
 
     def get_last_month_tabel(self):
-        """Afiseaza doar ultima luna din tabelul procesat."""
+        """
+         Retrieves all transactions from the previous calendar month.
+
+         This method processes the file and filters the resulting DataFrame to
+         include only the transactions that occurred in the month prior to the
+         current one.
+
+         Returns:
+             pd.DataFrame or None: A DataFrame containing last month's data,
+                                   or None if the file is empty.
+        """
+
         data = self.process_file()
         df = self.convert_tabel(data)
 
@@ -160,7 +231,7 @@ class ProcessFile:
 
 
 if __name__ == '__main__':
-    with open('../FILE/tranzactii_aprilie_claudiu.csv', mode='r', encoding='utf-8') as f:
+    with open('../FILE/transactions.csv', mode='r', encoding='utf-8') as f:
         content = f.read()
 
     fd = ProcessFile(file= content, name='Claudiu', sep=';', date_format= 'yyyy-mm-dd')

@@ -3,66 +3,101 @@ import plotly.express as px
 import plotly.io as pio
 
 
-def show_stats(df):
+def generate_expense_report(df: pd.DataFrame) -> str:
+    """
+    Generates an interactive expense report from a DataFrame.
 
-    stats = {
-        "income": float(df[df.Category == "income"]['Amount'].sum()),
-        "savings": float(round(df['Amount'].sum(), 2)),
-        "housing": float(round(df[df.Category == 'housing']['Amount'].sum(), 2)),
-        "bankLoans": float(round(df[df.Category == 'bank loans']['Amount'].sum(), 2)),
-        "groceries": float(round(df[df.Category == 'groceries']['Amount'].sum(), 2)),
-        "mobility": float(round(df[df.Category == 'mobility']['Amount'].sum(), 2)),
-        "utilities": float(round(df[df.Category == 'utilities & telecom']['Amount'].sum(), 2)),
-        "insurances": float(round(df[df.Category == 'finance & insurances']['Amount'].sum(), 2)),
-        "health": float(round(df[df.Category == 'health']['Amount'].sum(), 2)),
-        "restaurants": float(round(df[df.Category == 'bars & restaurants']['Amount'].sum(), 2)),
-        "shopping": float(round(df[df.Category == 'shopping']['Amount'].sum(), 2)),
-        "education": float(round(df[df.Category == 'education']['Amount'].sum(), 2)),
-        "entertainment": float(round(df[df.Category == 'leisure & entertainment']['Amount'].sum(), 2)),
-        "services": float(round(df[df.Category == 'services']['Amount'].sum(), 2)),
-        "atmWithdraw": float(round(df[df.Category == 'atm withdraw']['Amount'].sum(), 2)),
-        "government": float(round(df[df.Category == 'government']['Amount'].sum(), 2)),
-        "others": float(round(df[df.Category == 'others']['Amount'].sum(), 2)),
-    }
+    This function takes a pandas DataFrame containing financial transactions,
+    groups them by category, and calculates the total amount for each. It
+    differentiates between income and expenses, calculates total savings, and
+    creates a Plotly bar chart to visualize the expense distribution. The chart
+    includes annotations for total income and savings.
 
-    expenses = {k: abs(v) for k, v in stats.items() if k not in ["income", "savings"] and v != 0}
+    Args:
+        df (pd.DataFrame): A DataFrame that must include 'Category' and 'Amount'
+                           columns. Income is expected to be a positive value,
+                           while expenses should be negative.
 
-    data = pd.DataFrame(list(expenses.items()), columns=["Category", "Amount"])
-    data["Category"] = data["Category"].str.title()
+    Returns:
+        str: An HTML string representing the Plotly chart, ready to be
+             embedded in a web page. The returned HTML is a fragment, not a
+             full document.
+    """
+    # 1. Dynamically calculate the sum for each category
+    category_totals = df.groupby('Category')['Amount'].sum()
 
-    fig = px.bar(data, x="Category", y="Amount",
+    # 2. Extract income and calculate total expenses
+    # Assumes 'income' is a category name. Defaults to 0 if not found.
+    income = category_totals.get('income', 0)
+
+    # All other categories are treated as expenses
+    expenses = category_totals[category_totals.index != 'income'] * -1
+
+    # Filter out any credits/refunds to only sum true expenses
+    expenses = expenses[expenses > 0]
+
+    # 3. Calculate savings
+    total_expenses = expenses.sum()
+    savings = income - total_expenses
+
+    # 4. Prepare the data for plotting
+    expenses_df = expenses.reset_index()
+    expenses_df.columns = ['Category', 'Amount']
+    expenses_df = expenses_df.sort_values(by='Amount', ascending=False)
+
+    # Ensure consistent title case for display
+    expenses_df['Category'] = expenses_df['Category'].str.title()
+
+    # 5. Create the bar chart
+    fig = px.bar(expenses_df,
+                 x="Category",
+                 y="Amount",
                  title="Expense Distribution by Category",
                  labels={"Category": "Category", "Amount": "Amount (EUR)"},
-                 text="Amount",
-                 color="Category",
-                 color_discrete_sequence=px.colors.qualitative.Set1,
-                 height= 800)
+                 text_auto='.2f',  # Automatically display the value on the bar, formatted to 2 decimal places
+                 color="Category")
 
-    fig.update_traces(texttemplate='%{text}', textposition='outside', hoverinfo='x+y+text')
+    fig.update_traces(textposition='outside')
     fig.update_xaxes(tickangle=45)
+    fig.update_layout(height=800, showlegend=False)
 
-    income_color = 'green' if stats['income'] > 0 else 'red'
-    savings_color = 'green' if stats['savings'] > 0 else 'red'
+    # 6. Add annotations for key metrics
+    income_color = 'green' if income > 0 else 'red'
+    savings_color = 'green' if savings > 0 else 'red'
 
     fig.update_layout(
         annotations=[
             dict(
-                x=0.9, y=0.9,
-                xref="paper", yref="paper",
-                text=f"Income: {stats['income']} EUR",
-                showarrow=False,
-                font=dict(size=14, color=income_color),
-                align="left"
+                x=0.95, y=0.95, xref="paper", yref="paper",
+                text=f"Income: {income:.2f} EUR", showarrow=False,
+                font=dict(size=14, color=income_color), align="right"
             ),
             dict(
-                x=0.9, y=0.85,
-                xref="paper", yref="paper",
-                text=f"Savings: {stats['savings']} EUR",
-                showarrow=False,
-                font=dict(size=14, color=savings_color),
-                align="left"
+                x=0.95, y=0.90, xref="paper", yref="paper",
+                text=f"Savings: {savings:.2f} EUR", showarrow=False,
+                font=dict(size=14, color=savings_color), align="right"
             )
         ]
     )
 
-    return pio.to_html(fig, full_html=False)
+    return pio.to_html(fig, full_html=False, config={'displayModeBar': False})
+
+
+# This part allows the script to be run directly for testing purposes
+if __name__ == '__main__':
+    # Example usage with sample data
+    sample_data = {
+        'Category': ['income', 'housing', 'groceries', 'transport',
+                     'utilities', 'shopping', 'entertainment', 'subscriptions'],
+        'Amount': [3500.00, -850.50, -475.25, -150.00, -210.75, -400.00, -180.50, -45.00]
+    }
+    sample_df = pd.DataFrame(sample_data)
+
+    # Generate the report HTML
+    html_chart = generate_expense_report(sample_df)
+
+    # Save the output to an HTML file to view it
+    with open("expense_report.html", "w", encoding="utf-8") as f:
+        f.write(html_chart)
+
+    print("Report generated successfully!")
